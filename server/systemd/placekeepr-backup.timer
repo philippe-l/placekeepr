@@ -1,0 +1,12 @@
+[Unit]
+Description=Sauvegarde PlaceKeepr quotidienne
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+# Rattrape la sauvegarde si la machine était éteinte à l'heure prévue.
+Persistent=true
+# Évite de taper à la seconde pile en même temps que les autres timers.
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

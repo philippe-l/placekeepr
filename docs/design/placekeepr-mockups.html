@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlaceKeepr — Maquettes DA pixel-art</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  /* ============ TOKENS — PALETTE PICO-8 STRICTE ============ */
+  :root{
+    --bg:#0f0f1b;        /* fond */
+    --surface:#1d2b53;   /* surface / eau */
+    --text:#fff1e8;      /* texte */
+    --green:#00e436;     /* action principale */
+    --red:#ff004d;       /* danger / accent */
+    --yellow:#ffec27;    /* or / réputation */
+    --blue:#29adff;      /* bleu */
+    --orange:#ffa300;    /* autoroutes / frais */
+    --lav:#83769c;       /* secondaire / routes */
+    --pink:#ff77a8;      /* rose */
+    --ink:#000000;       /* ombres dures */
+
+    --b:3px;             /* bordure épaisse */
+    --shadow:4px 4px 0 0 var(--ink);   /* ombre dure décalée */
+    --shadow-lg:6px 6px 0 0 var(--ink);
+    --press:#ff004d;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  html,body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Courier New",ui-monospace,monospace;
+    font-size:13px;
+    line-height:1.5;
+    /* grille de fond = motif SVG de lignes nettes 1px (aucun dégradé) */
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M32 0H0V32' fill='none' stroke='%231d2b53' stroke-width='1'/%3E%3C/svg%3E");
+    background-size:32px 32px;
+  }
+
+  .pix{font-family:"Press Start 2P",monospace;}
+  img,svg{image-rendering:pixelated;image-rendering:crisp-edges;}
+
+  /* ============ EN-TÊTE DE PAGE ============ */
+  header.page{
+    padding:32px 24px 8px;
+    text-align:center;
+  }
+  header.page h1{
+    font-family:"Press Start 2P",monospace;
+    font-size:24px;
+    color:var(--green);
+    text-shadow:3px 3px 0 var(--ink);
+    letter-spacing:1px;
+  }
+  header.page .tag{
+    margin-top:14px;
+    display:inline-block;
+    background:var(--surface);
+    border:var(--b) solid var(--text);
+    box-shadow:var(--shadow);
+    padding:8px 12px;
+    color:var(--text);
+    font-size:12px;
+  }
+  header.page .tag b{color:var(--yellow)}
+
+  /* swatches palette */
+  .palette{
+    display:flex;gap:0;justify-content:center;margin:20px auto 0;
+    border:var(--b) solid var(--text);box-shadow:var(--shadow);width:max-content;
+  }
+  .palette span{width:30px;height:24px;display:block}
+
+  /* ============ ZONE DES ÉCRANS ============ */
+  .deck{
+    display:flex;
+    flex-wrap:wrap;
+    gap:48px 40px;
+    justify-content:center;
+    align-items:flex-start;
+    padding:40px 24px 80px;
+  }
+  .frame-wrap{width:300px}
+
+  .label{
+    font-family:"Press Start 2P",monospace;
+    font-size:11px;color:var(--yellow);
+    margin-bottom:12px;text-align:center;line-height:1.6;
+  }
+  .label .n{color:var(--bg);background:var(--yellow);padding:3px 6px;margin-right:6px}
+
+  /* le téléphone : ratio 1080x2400 = 9:20 */
+  .phone{
+    width:300px;height:666px;
+    background:var(--bg);
+    border:var(--b) solid var(--text);
+    box-shadow:var(--shadow-lg);
+    position:relative;
+    overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+
+  /* barre d'état rétro */
+  .statusbar{
+    height:22px;flex:0 0 22px;
+    background:var(--surface);
+    border-bottom:var(--b) solid var(--text);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 8px;font-size:9px;color:var(--text);
+    font-family:"Press Start 2P",monospace;
+    z-index:30;
+  }
+  .statusbar .dots{display:flex;gap:3px}
+  .statusbar .dots i{width:6px;height:6px;background:var(--green);display:block}
+  .statusbar .dots i.off{background:var(--lav)}
+
+  .screen{flex:1 1 auto;position:relative;overflow:hidden}
+
+  /* ============ COMPOSANTS RÉUTILISABLES ============ */
+  .btn{
+    font-family:"Press Start 2P",monospace;
+    font-size:11px;
+    color:var(--ink);
+    background:var(--green);
+    border:var(--b) solid var(--text);
+    box-shadow:var(--shadow);
+    padding:13px 10px;
+    text-align:center;
+    cursor:pointer;
+    text-transform:uppercase;
+    user-select:none;
+    line-height:1.4;
+    transition:none;
+  }
+  .btn:active{transform:translate(4px,4px);box-shadow:0 0 0 0 var(--ink)}
+  .btn--red{background:var(--red);color:var(--text)}
+  .btn--ghost{background:var(--surface);color:var(--text)}
+  .btn--blue{background:var(--blue)}
+  .btn--yellow{background:var(--yellow)}
+
+  .panel{
+    background:var(--surface);
+    border:var(--b) solid var(--text);
+    box-shadow:var(--shadow);
+  }
+  .chip{
+    display:inline-flex;align-items:center;gap:5px;
+    border:var(--b) solid var(--text);
+    background:var(--bg);
+    padding:4px 7px;font-size:11px;
+  }
+  .chip .pic{width:10px;height:10px;display:block}
+
+  /* ============ ÉCRAN 1 : CARTE ============ */
+  .map{
+    position:absolute;inset:0;
+    background:var(--bg);
+    overflow:hidden;
+  }
+  .map .grid{
+    position:absolute;inset:0;opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M24 0H0V24' fill='none' stroke='%231d2b53' stroke-width='1'/%3E%3C/svg%3E");
+    background-size:24px 24px;
+  }
+  /* eau : blocs solides */
+  .water{position:absolute;background:var(--surface)}
+  /* routes : lignes solides */
+  .road{position:absolute;background:var(--lav)}
+  .hwy{position:absolute;background:var(--orange)}
+
+  /* overlay coordonnées */
+  .coord{
+    position:absolute;top:10px;left:10px;right:10px;z-index:20;
+    background:var(--bg);
+    border:var(--b) solid var(--green);
+    box-shadow:var(--shadow);
+    padding:8px 10px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .coord .lat{font-family:"Press Start 2P",monospace;font-size:10px;color:var(--green);line-height:1.7}
+  .coord .acc{font-size:10px;color:var(--text);text-align:right}
+  .coord .acc b{color:var(--yellow)}
+
+  /* marqueurs */
+  .marker{position:absolute;transform:translate(-50%,-100%);z-index:15;cursor:pointer}
+  .marker:active{transform:translate(-50%,-100%) translateY(2px)}
+  .marker .pulse{position:absolute;left:50%;bottom:-3px;width:30px;height:10px;
+    transform:translateX(-50%);background:transparent}
+
+  /* "vous êtes ici" */
+  .me-here{
+    position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);z-index:14;
+    width:14px;height:14px;background:var(--blue);
+    border:var(--b) solid var(--text);
+    box-shadow:0 0 0 6px rgba(41,173,255,.25);
+    animation:ping 1s steps(2) infinite;
+  }
+  @keyframes ping{0%{box-shadow:0 0 0 4px rgba(41,173,255,.35)}100%{box-shadow:0 0 0 12px rgba(41,173,255,0)}}
+
+  .legend{
+    position:absolute;left:10px;bottom:84px;z-index:20;
+    background:var(--bg);border:var(--b) solid var(--text);box-shadow:var(--shadow);
+    padding:7px 8px;font-size:10px;display:flex;flex-direction:column;gap:5px;
+  }
+  .legend div{display:flex;align-items:center;gap:6px}
+  .legend i{width:11px;height:11px;display:block;border:2px solid var(--text)}
+
+  .mint-bar{
+    position:absolute;left:10px;right:10px;bottom:10px;z-index:20;
+  }
+  .mint-bar .btn{width:100%;font-size:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+
+  /* ============ ÉCRAN 2 : FICHE LIEU ============ */
+  .sheet{position:absolute;inset:0;display:flex;flex-direction:column;overflow:auto}
+  .photo{
+    width:100%;height:170px;flex:0 0 170px;
+    border-bottom:var(--b) solid var(--text);
+    position:relative;background:var(--surface);overflow:hidden;
+  }
+  .photo svg{width:100%;height:100%;display:block}
+  .photo .badge-keep{
+    position:absolute;top:8px;right:8px;
+    background:var(--yellow);color:var(--ink);
+    font-family:"Press Start 2P",monospace;font-size:8px;
+    border:var(--b) solid var(--ink);padding:5px 6px;box-shadow:var(--shadow);
+  }
+  .body{padding:12px;display:flex;flex-direction:column;gap:11px}
+  .place-name{font-family:"Press Start 2P",monospace;font-size:13px;color:var(--text);line-height:1.6}
+  .place-sub{font-size:11px;color:var(--lav)}
+  .guardian{
+    display:flex;align-items:center;gap:9px;
+    background:var(--surface);border:var(--b) solid var(--text);box-shadow:var(--shadow);
+    padding:8px;
+  }
+  .guardian svg{width:34px;height:34px;flex:0 0 34px;border:var(--b) solid var(--text)}
+  .guardian .g-name{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--yellow);line-height:1.6}
+  .guardian .g-meta{font-size:10px;color:var(--text)}
+  .stats{display:flex;gap:8px}
+  .stat{flex:1;text-align:center;background:var(--bg);border:var(--b) solid var(--text);padding:8px 4px}
+  .stat .v{font-family:"Press Start 2P",monospace;font-size:13px}
+  .stat .v.likes{color:var(--pink)}
+  .stat .v.visits{color:var(--blue)}
+  .stat .k{font-size:9px;color:var(--lav);margin-top:5px;text-transform:uppercase}
+  .like-row{display:flex;gap:8px}
+  .like-row .btn{flex:1}
+  .history{display:flex;flex-direction:column;gap:6px}
+  .history .h-title{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--lav);margin-bottom:2px}
+  .h-item{display:flex;align-items:center;gap:8px;font-size:11px;border-left:var(--b) solid var(--lav);padding:3px 0 3px 8px}
+  .h-item b{color:var(--text)}
+  .h-item .dot{width:8px;height:8px;flex:0 0 8px}
+
+  /* ============ ÉCRAN 3 : PROFIL ============ */
+  .profile{position:absolute;inset:0;display:flex;flex-direction:column;overflow:auto;padding:12px;gap:12px}
+  .prof-head{display:flex;gap:11px;align-items:center}
+  .prof-head .av{width:64px;height:64px;flex:0 0 64px;border:var(--b) solid var(--text);box-shadow:var(--shadow)}
+  .prof-head .who .name{font-family:"Press Start 2P",monospace;font-size:13px;color:var(--text);line-height:1.6}
+  .prof-head .who .rank{display:inline-block;margin-top:6px;background:var(--yellow);color:var(--ink);
+    font-family:"Press Start 2P",monospace;font-size:8px;padding:4px 6px;border:2px solid var(--ink)}
+  .xp{background:var(--surface);border:var(--b) solid var(--text);box-shadow:var(--shadow);padding:9px}
+  .xp .lab{display:flex;justify-content:space-between;font-family:"Press Start 2P",monospace;font-size:8px;margin-bottom:7px}
+  .xp .lab .lv{color:var(--yellow)}
+  .xp .lab .pts{color:var(--green)}
+  .xpbar{height:16px;background:var(--bg);border:var(--b) solid var(--text);display:flex;padding:2px;gap:2px}
+  .xpbar i{flex:1;background:var(--bg)}
+  .xpbar i.on{background:var(--green)}
+  .xpbar i.half{background:var(--yellow)}
+  .roy{display:flex;gap:8px}
+  .roy .box{flex:1;background:var(--bg);border:var(--b) solid var(--text);box-shadow:var(--shadow);padding:9px;text-align:center}
+  .roy .box .v{font-family:"Press Start 2P",monospace;font-size:13px;color:var(--yellow)}
+  .roy .box .v.sm{font-size:11px;color:var(--green)}
+  .roy .box .k{font-size:9px;color:var(--lav);margin-top:5px;text-transform:uppercase}
+  .grid-title{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--lav)}
+  .keep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+  .keep-grid .cell{aspect-ratio:1;border:var(--b) solid var(--text);position:relative;overflow:hidden;background:var(--surface)}
+  .keep-grid .cell svg{width:100%;height:100%;display:block}
+  .keep-grid .cell.locked{display:flex;align-items:center;justify-content:center;background:var(--bg)}
+  .keep-grid .cell.locked span{font-family:"Press Start 2P",monospace;font-size:16px;color:var(--lav)}
+  .keep-grid .cell .crown{position:absolute;top:2px;right:2px;width:12px;height:12px}
+
+  /* ============ ÉCRAN 4 : CONFIRMATION MINT ============ */
+  .confirm{position:absolute;inset:0;display:flex;flex-direction:column;padding:12px;gap:11px}
+  .confirm .ct{font-family:"Press Start 2P",monospace;font-size:12px;color:var(--green);text-align:center;line-height:1.7;margin-top:4px}
+  .preview{height:150px;flex:0 0 150px;border:var(--b) solid var(--text);box-shadow:var(--shadow);overflow:hidden;position:relative;background:var(--surface)}
+  .preview svg{width:100%;height:100%;display:block}
+  .preview .live{position:absolute;top:6px;left:6px;background:var(--red);color:var(--text);
+    font-family:"Press Start 2P",monospace;font-size:7px;padding:4px 5px;border:2px solid var(--text)}
+  .rows{display:flex;flex-direction:column;gap:7px}
+  .row{display:flex;justify-content:space-between;align-items:center;
+    background:var(--surface);border:var(--b) solid var(--text);padding:8px 9px;font-size:11px}
+  .row .k{color:var(--lav);font-size:10px;text-transform:uppercase}
+  .row .v{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--text)}
+  .row .v.fee{color:var(--orange)}
+  .row .v.coin{color:var(--green)}
+  .confirm .total{border-color:var(--yellow)}
+  .confirm .total .v{color:var(--yellow);font-size:11px}
+  .confirm .actions{margin-top:auto;display:flex;flex-direction:column;gap:9px}
+  .confirm .actions .btn{width:100%}
+  .confirm .warn{font-size:10px;color:var(--lav);text-align:center;line-height:1.6}
+  .confirm .warn b{color:var(--red)}
+
+  /* ============ ANNOTATIONS GAMIFICATION ============ */
+  .anno{
+    width:300px;margin-top:14px;
+    background:var(--bg);
+    border:var(--b) dashed var(--pink);
+    box-shadow:var(--shadow);
+    padding:10px;
+  }
+  .anno h4{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--pink);margin-bottom:8px;line-height:1.6}
+  .anno p{font-size:11px;color:var(--text);margin-bottom:7px}
+  .anno p b{color:var(--yellow)}
+  .anno p:last-child{margin-bottom:0}
+
+  .gami{
+    margin:0 24px 60px;
+    border:var(--b) solid var(--pink);
+    box-shadow:var(--shadow-lg);
+    background:var(--surface);
+    padding:20px;
+  }
+  .gami h2{font-family:"Press Start 2P",monospace;font-size:14px;color:var(--pink);text-shadow:2px 2px 0 var(--ink);margin-bottom:18px}
+  .gami .cards{display:flex;flex-wrap:wrap;gap:16px}
+  .gami .card{flex:1 1 240px;background:var(--bg);border:var(--b) solid var(--text);box-shadow:var(--shadow);padding:14px}
+  .gami .card h3{font-family:"Press Start 2P",monospace;font-size:10px;color:var(--yellow);margin-bottom:10px;line-height:1.6}
+  .gami .card p{font-size:12px;color:var(--text);line-height:1.6}
+  .gami .card .demo{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+
+  /* badges démo */
+  .badge{width:40px;height:40px;border:var(--b) solid var(--text);box-shadow:var(--shadow);display:block}
+  .float{animation:float 1.2s steps(3) infinite alternate}
+  @keyframes float{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+  .spawn{animation:spawn 1.6s steps(4) infinite}
+  @keyframes spawn{
+    0%{transform:translateY(-100%) scale(.4);opacity:0}
+    40%{opacity:1}
+    60%{transform:translateY(0) scale(1.15)}
+    75%{transform:translateY(0) scale(.92)}
+    100%{transform:translateY(0) scale(1)}
+  }
+
+  footer.page{text-align:center;padding:0 24px 50px;color:var(--lav);font-size:11px}
+  footer.page b{color:var(--green)}
+</style>
+</head>
+<body>
+
+<header class="page">
+  <h1>PLACEKEEPR</h1>
+  <div class="tag">DA pixel-art · Pico-8 · <b>Game Boy Color × cartographie</b> · 1080×2400</div>
+  <div class="palette">
+    <span style="background:#0f0f1b"></span>
+    <span style="background:#1d2b53"></span>
+    <span style="background:#fff1e8"></span>
+    <span style="background:#00e436"></span>
+    <span style="background:#ff004d"></span>
+    <span style="background:#ffec27"></span>
+    <span style="background:#29adff"></span>
+    <span style="background:#ffa300"></span>
+    <span style="background:#83769c"></span>
+    <span style="background:#ff77a8"></span>
+  </div>
+</header>
+
+<div class="deck">
+
+  <!-- ============================================================= -->
+  <!-- ÉCRAN 1 : CARTE -->
+  <!-- ============================================================= -->
+  <div class="frame-wrap">
+    <div class="label"><span class="n">1</span>CARTE</div>
+    <div class="phone">
+      <div class="statusbar">
+        <span>PLACEKEEPR</span>
+        <span class="dots"><i></i><i></i><i></i><i class="off"></i></span>
+      </div>
+      <div class="screen">
+        <div class="map">
+          <div class="grid"></div>
+          <!-- eau (blocs solides) -->
+          <div class="water" style="top:0;left:-20px;width:120px;height:90px"></div>
+          <div class="water" style="bottom:120px;right:-30px;width:140px;height:160px"></div>
+          <div class="water" style="top:300px;left:-30px;width:60px;height:120px"></div>
+          <!-- rivière -->
+          <div class="water" style="top:80px;left:60px;width:18px;height:260px"></div>
+          <div class="water" style="top:330px;left:60px;width:120px;height:18px"></div>
+          <!-- routes -->
+          <div class="road" style="top:0;left:140px;width:6px;height:100%"></div>
+          <div class="road" style="top:200px;left:0;width:100%;height:6px"></div>
+          <div class="road" style="top:430px;left:0;width:100%;height:6px"></div>
+          <div class="road" style="top:0;left:230px;width:6px;height:100%"></div>
+          <!-- autoroute orange -->
+          <div class="hwy" style="top:0;left:0;width:8px;height:100%;transform:skewX(-12deg);left:95px"></div>
+          <div class="hwy" style="top:120px;left:0;width:100%;height:8px"></div>
+
+          <!-- overlay coordonnées -->
+          <div class="coord">
+            <div class="lat">48.8584°N<br>2.2945°E</div>
+            <div class="acc">PRÉCISION<br><b>±4 m</b> · GPS</div>
+          </div>
+
+          <!-- marqueurs : MES lieux (vert + étoile) -->
+          <div class="marker" style="left:42%;top:40%">
+            <svg width="26" height="32" viewBox="0 0 13 16" shape-rendering="crispEdges">
+              <rect x="2" y="0" width="9" height="9" fill="#00e436"/>
+              <rect x="0" y="2" width="2" height="5" fill="#00e436"/>
+              <rect x="11" y="2" width="2" height="5" fill="#00e436"/>
+              <rect x="2" y="0" width="9" height="9" fill="none" stroke="#fff1e8" stroke-width="1"/>
+              <rect x="5" y="9" width="3" height="4" fill="#00e436" stroke="#fff1e8" stroke-width="0.5"/>
+              <rect x="6" y="13" width="1" height="3" fill="#00e436"/>
+              <!-- étoile -->
+              <rect x="6" y="2" width="1" height="5" fill="#0f0f1b"/>
+              <rect x="4" y="4" width="5" height="1" fill="#0f0f1b"/>
+              <rect x="5" y="3" width="3" height="3" fill="#0f0f1b"/>
+            </svg>
+          </div>
+          <div class="marker" style="left:70%;top:62%">
+            <svg width="26" height="32" viewBox="0 0 13 16" shape-rendering="crispEdges">
+              <rect x="2" y="0" width="9" height="9" fill="#00e436"/>
+              <rect x="0" y="2" width="2" height="5" fill="#00e436"/>
+              <rect x="11" y="2" width="2" height="5" fill="#00e436"/>
+              <rect x="2" y="0" width="9" height="9" fill="none" stroke="#fff1e8" stroke-width="1"/>
+              <rect x="5" y="9" width="3" height="4" fill="#00e436" stroke="#fff1e8" stroke-width="0.5"/>
+              <rect x="5" y="3" width="3" height="3" fill="#0f0f1b"/>
+            </svg>
+          </div>
+
+          <!-- marqueurs : lieux d'AUTRES gardiens (bleu) -->
+          <div class="marker" style="left:24%;top:30%">
+            <svg width="22" height="27" viewBox="0 0 13 16" shape-rendering="crispEdges">
+              <rect x="2" y="0" width="9" height="9" fill="#29adff"/>
+              <rect x="0" y="2" width="2" height="5" fill="#29adff"/>
+              <rect x="11" y="2" width="2" height="5" fill="#29adff"/>
+              <rect x="2" y="0" width="9" height="9" fill="none" stroke="#fff1e8" stroke-width="1"/>
+              <rect x="5" y="9" width="3" height="4" fill="#29adff" stroke="#fff1e8" stroke-width="0.5"/>
+              <rect x="5" y="3" width="3" height="3" fill="#0f0f1b"/>
+            </svg>
+          </div>
+          <div class="marker" style="left:85%;top:34%">
+            <svg width="22" height="27" viewBox="0 0 13 16" shape-rendering="crispEdges">
+              <rect x="2" y="0" width="9" height="9" fill="#29adff"/>
+              <rect x="0" y="2" width="2" height="5" fill="#29adff"/>
+              <rect x="11" y="2" width="2" height="5" fill="#29adff"/>
+              <rect x="2" y="0" width="9" height="9" fill="none" stroke="#fff1e8" stroke-width="1"/>
+              <rect x="5" y="9" width="3" height="4" fill="#29adff" stroke="#fff1e8" stroke-width="0.5"/>
+              <rect x="5" y="3" width="3" height="3" fill="#0f0f1b"/>
+            </svg>
+          </div>
+          <div class="marker" style="left:55%;top:78%">
+            <svg width="22" height="27" viewBox="0 0 13 16" shape-rendering="crispEdges">
+              <rect x="2" y="0" width="9" height="9" fill="#ff77a8"/>
+              <rect x="0" y="2" width="2" height="5" fill="#ff77a8"/>
+              <rect x="11" y="2" width="2" height="5" fill="#ff77a8"/>
+              <rect x="2" y="0" width="9" height="9" fill="none" stroke="#fff1e8" stroke-width="1"/>
+              <rect x="5" y="9" width="3" height="4" fill="#ff77a8" stroke="#fff1e8" stroke-width="0.5"/>
+              <rect x="5" y="3" width="3" height="3" fill="#0f0f1b"/>
+            </svg>
+          </div>
+
+          <!-- vous êtes ici -->
+          <div class="me-here"></div>
+
+          <!-- légende -->
+          <div class="legend">
+            <div><i style="background:#00e436"></i> MES LIEUX</div>
+            <div><i style="background:#29adff"></i> AUTRES GARDIENS</div>
+          </div>
+
+          <!-- bouton mint -->
+          <div class="mint-bar">
+            <div class="btn">▶ MINT THIS PLACE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="anno">
+      <h4>// NOTE DA</h4>
+      <p>Marqueur <b>vert + étoile</b> = lieu gardé par le joueur, <b>bleu/rose</b> = autres gardiens. Le point <b>bleu pulsant</b> = position GPS live (animation par paliers <code>steps()</code>, pas de flou).</p>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- ÉCRAN 2 : FICHE LIEU -->
+  <!-- ============================================================= -->
+  <div class="frame-wrap">
+    <div class="label"><span class="n">2</span>FICHE LIEU</div>
+    <div class="phone">
+      <div class="statusbar">
+        <span>LIEU</span>
+        <span class="dots"><i></i><i></i><i></i><i class="off"></i></span>
+      </div>
+      <div class="screen">
+        <div class="sheet">
+          <!-- photo pixel -->
+          <div class="photo">
+            <svg viewBox="0 0 64 34" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges">
+              <rect width="64" height="34" fill="#1d2b53"/>
+              <rect y="0" width="64" height="14" fill="#0f0f1b"/>
+              <!-- étoiles -->
+              <rect x="8" y="3" width="1" height="1" fill="#fff1e8"/>
+              <rect x="20" y="6" width="1" height="1" fill="#fff1e8"/>
+              <rect x="48" y="2" width="1" height="1" fill="#fff1e8"/>
+              <rect x="55" y="7" width="1" height="1" fill="#ffec27"/>
+              <!-- lune -->
+              <rect x="50" y="3" width="6" height="6" fill="#ffec27"/>
+              <rect x="52" y="3" width="4" height="6" fill="#1d2b53"/>
+              <!-- colline -->
+              <rect y="22" width="64" height="12" fill="#1d2b53"/>
+              <!-- tour / phare au centre -->
+              <rect x="29" y="8" width="6" height="16" fill="#fff1e8"/>
+              <rect x="29" y="11" width="6" height="2" fill="#ff004d"/>
+              <rect x="29" y="16" width="6" height="2" fill="#ff004d"/>
+              <rect x="28" y="6" width="8" height="3" fill="#ffa300"/>
+              <rect x="30" y="3" width="4" height="3" fill="#ffec27"/>
+              <!-- faisceau -->
+              <rect x="36" y="4" width="10" height="1" fill="#ffec27" opacity="0.7"/>
+              <rect x="18" y="4" width="10" height="1" fill="#ffec27" opacity="0.7"/>
+              <!-- reflets eau -->
+              <rect x="30" y="26" width="4" height="1" fill="#29adff"/>
+              <rect x="28" y="29" width="8" height="1" fill="#29adff"/>
+            </svg>
+            <div class="badge-keep">★ GARDÉ</div>
+          </div>
+
+          <div class="body">
+            <div>
+              <div class="place-name">PHARE DU VIEUX PORT</div>
+              <div class="place-sub">48.8584°N · 2.2945°E · minté il y a 3 mois</div>
+            </div>
+
+            <!-- gardien -->
+            <div class="guardian">
+              <svg viewBox="0 0 8 8" shape-rendering="crispEdges">
+                <rect width="8" height="8" fill="#ffa300"/>
+                <rect x="2" y="1" width="4" height="3" fill="#fff1e8"/>
+                <rect x="2" y="4" width="4" height="3" fill="#00e436"/>
+                <rect x="3" y="2" width="1" height="1" fill="#0f0f1b"/>
+                <rect x="5" y="2" width="1" height="1" fill="#0f0f1b"/>
+              </svg>
+              <div>
+                <div class="g-name">GARDIEN · PIXLR_44</div>
+                <div class="g-meta">Réputation 2 480 ⚡ · niv. 7</div>
+              </div>
+            </div>
+
+            <!-- compteurs -->
+            <div class="stats">
+              <div class="stat"><div class="v visits">1 204</div><div class="k">visites</div></div>
+              <div class="stat"><div class="v likes">372</div><div class="k">likes</div></div>
+              <div class="stat"><div class="v" style="color:#ffec27">A+</div><div class="k">rareté</div></div>
+            </div>
+
+            <!-- like -->
+            <div class="like-row">
+              <div class="btn btn--blue">♥ LIKE</div>
+              <div class="btn btn--ghost">↗ PARTAGER</div>
+            </div>
+
+            <!-- historique -->
+            <div class="history">
+              <div class="h-title">HISTORIQUE</div>
+              <div class="h-item"><span class="dot" style="background:#00e436"></span> <b>vous</b> avez visité — auj.</div>
+              <div class="h-item"><span class="dot" style="background:#ff77a8"></span> <b>n0va</b> a liké — hier</div>
+              <div class="h-item"><span class="dot" style="background:#ffec27"></span> royalties <b>+0.04 ◎</b> — 2 j</div>
+              <div class="h-item"><span class="dot" style="background:#29adff"></span> <b>retr0</b> a visité — 3 j</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="anno">
+      <h4>// NOTE DA</h4>
+      <p>Photo = scène <b>pixel-art</b> recadrée (image réelle passée en filtre dither/quantize Pico-8 côté app). Badge <b>★ GARDÉ</b> en or si le viewer est le gardien.</p>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- ÉCRAN 3 : PROFIL -->
+  <!-- ============================================================= -->
+  <div class="frame-wrap">
+    <div class="label"><span class="n">3</span>PROFIL GARDIEN</div>
+    <div class="phone">
+      <div class="statusbar">
+        <span>PROFIL</span>
+        <span class="dots"><i></i><i></i><i class="off"></i><i class="off"></i></span>
+      </div>
+      <div class="screen">
+        <div class="profile">
+          <!-- tête -->
+          <div class="prof-head">
+            <svg class="av" viewBox="0 0 8 8" shape-rendering="crispEdges">
+              <rect width="8" height="8" fill="#83769c"/>
+              <rect x="1" y="1" width="6" height="2" fill="#ffec27"/>
+              <rect x="1" y="3" width="6" height="3" fill="#fff1e8"/>
+              <rect x="2" y="4" width="1" height="1" fill="#0f0f1b"/>
+              <rect x="5" y="4" width="1" height="1" fill="#0f0f1b"/>
+              <rect x="3" y="6" width="2" height="1" fill="#ff004d"/>
+              <rect x="2" y="7" width="4" height="1" fill="#00e436"/>
+            </svg>
+            <div class="who">
+              <div class="name">PIXLR_44</div>
+              <div class="rank">★ GARDIEN OR</div>
+            </div>
+          </div>
+
+          <!-- barre XP -->
+          <div class="xp">
+            <div class="lab"><span class="lv">NIVEAU 7</span><span class="pts">2480 / 3000 ⚡</span></div>
+            <div class="xpbar">
+              <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+              <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+              <i class="half"></i><i></i>
+            </div>
+          </div>
+
+          <!-- royalties -->
+          <div class="roy">
+            <div class="box"><div class="v">12.8 ◎</div><div class="k">royalties</div></div>
+            <div class="box"><div class="v sm">18</div><div class="k">lieux gardés</div></div>
+            <div class="box"><div class="v sm" style="color:#29adff">5.1k</div><div class="k">visites</div></div>
+          </div>
+
+          <!-- grille de lieux -->
+          <div class="grid-title">LIEUX GARDÉS</div>
+          <div class="keep-grid">
+            <div class="cell">
+              <svg viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="#1d2b53"/><rect x="3" y="1" width="2" height="5" fill="#fff1e8"/><rect x="2" y="6" width="4" height="2" fill="#00e436"/><rect x="3" y="0" width="2" height="1" fill="#ffec27"/></svg>
+              <svg class="crown" viewBox="0 0 8 8" shape-rendering="crispEdges"><rect x="1" y="3" width="6" height="3" fill="#ffec27"/><rect x="1" y="1" width="1" height="2" fill="#ffec27"/><rect x="4" y="1" width="1" height="2" fill="#ffec27"/><rect x="7" y="1" width="0" height="0"/><rect x="6" y="1" width="1" height="2" fill="#ffec27"/></svg>
+            </div>
+            <div class="cell">
+              <svg viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="#0f0f1b"/><rect x="1" y="4" width="6" height="4" fill="#83769c"/><rect x="2" y="2" width="4" height="2" fill="#ff004d"/><rect x="3" y="5" width="2" height="3" fill="#ffa300"/></svg>
+            </div>
+            <div class="cell">
+              <svg viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="#1d2b53"/><rect x="0" y="5" width="8" height="3" fill="#00e436"/><rect x="2" y="2" width="4" height="3" fill="#fff1e8"/><rect x="5" y="1" width="1" height="1" fill="#ffec27"/></svg>
+            </div>
+            <div class="cell">
+              <svg viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="#0f0f1b"/><rect x="1" y="1" width="6" height="6" fill="#29adff"/><rect x="2" y="2" width="4" height="4" fill="#1d2b53"/><rect x="3" y="3" width="2" height="2" fill="#ffec27"/></svg>
+            </div>
+            <div class="cell">
+              <svg viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="#1d2b53"/><rect x="2" y="3" width="4" height="5" fill="#ff77a8"/><rect x="3" y="1" width="2" height="2" fill="#fff1e8"/></svg>
+            </div>
+            <div class="cell locked"><span>?</span></div>
+            <div class="cell locked"><span>?</span></div>
+            <div class="cell locked"><span>?</span></div>
+            <div class="cell locked"><span>+</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="anno">
+      <h4>// NOTE DA</h4>
+      <p>Barre d'XP <b>rétro segmentée</b> (blocs pleins + 1 bloc jaune "en cours"). Cases <b>?</b> = lieux non encore capturés → moteur de collection facteur d'addiction.</p>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- ÉCRAN 4 : CONFIRMATION MINT -->
+  <!-- ============================================================= -->
+  <div class="frame-wrap">
+    <div class="label"><span class="n">4</span>CONFIRMER LE MINT</div>
+    <div class="phone">
+      <div class="statusbar">
+        <span>MINT</span>
+        <span class="dots"><i></i><i></i><i></i><i></i></span>
+      </div>
+      <div class="screen">
+        <div class="confirm">
+          <div class="ct">CAPTURER<br>CE LIEU ?</div>
+
+          <!-- preview -->
+          <div class="preview">
+            <svg viewBox="0 0 64 36" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges">
+              <rect width="64" height="36" fill="#0f0f1b"/>
+              <rect y="0" width="64" height="16" fill="#1d2b53"/>
+              <!-- soleil bas -->
+              <rect x="44" y="6" width="8" height="8" fill="#ffa300"/>
+              <rect x="46" y="4" width="4" height="2" fill="#ffec27"/>
+              <!-- montagnes -->
+              <rect y="16" width="64" height="20" fill="#83769c"/>
+              <rect x="6" y="10" width="16" height="10" fill="#1d2b53"/>
+              <rect x="12" y="8" width="4" height="4" fill="#fff1e8"/>
+              <rect x="38" y="12" width="18" height="10" fill="#0f0f1b"/>
+              <rect x="44" y="10" width="6" height="4" fill="#fff1e8"/>
+              <!-- arbres pixel -->
+              <rect x="4" y="24" width="3" height="6" fill="#ffa300"/>
+              <rect x="2" y="18" width="7" height="7" fill="#00e436"/>
+              <rect x="55" y="26" width="3" height="6" fill="#ffa300"/>
+              <rect x="53" y="20" width="7" height="7" fill="#00e436"/>
+              <rect y="30" width="64" height="6" fill="#00e436"/>
+            </svg>
+            <div class="live">● APERÇU</div>
+          </div>
+
+          <!-- détails -->
+          <div class="rows">
+            <div class="row"><span class="k">Coordonnées</span><span class="v coin">48.8584N 2.2945E</span></div>
+            <div class="row"><span class="k">Réseau</span><span class="v">SOLANA</span></div>
+            <div class="row"><span class="k">Frais de mint</span><span class="v fee">~0.012 ◎</span></div>
+            <div class="row"><span class="k">Gas</span><span class="v fee">~0.0004 ◎</span></div>
+            <div class="row total"><span class="k">Total estimé</span><span class="v">~0.0124 ◎</span></div>
+          </div>
+
+          <!-- actions -->
+          <div class="actions">
+            <div class="warn">Vous serez le <b>1ᵉʳ gardien</b> de ce lieu.<br>Action irréversible on-chain.</div>
+            <div class="btn">✓ CONFIRM</div>
+            <div class="btn btn--red">✕ CANCEL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="anno">
+      <h4>// NOTE DA</h4>
+      <p>Bouton <b>CONFIRM vert</b> = action principale, <b>CANCEL rouge</b> en dessous. Frais en <b>orange</b> (couleur "attention/coût"). Total surligné en <b>or</b>.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================= -->
+<!-- GAMIFICATION VISUELLE -->
+<!-- ============================================================= -->
+<div class="gami">
+  <h2>GAMIFICATION VISUELLE — 3 IDÉES</h2>
+  <div class="cards">
+
+    <div class="card">
+      <h3>1 · BADGES PIXEL DÉBLOCABLES</h3>
+      <p>Récompenses cosmétiques pour jalons : <b>1ᵉʳ mint</b>, <b>10 lieux</b>, <b>gardien d'un mois</b>, <b>chasseur de nuit</b>. Affichés sur le profil, échangeables en avatar-frame. Chaque badge "tombe" avec un rebond rétro à l'obtention.</p>
+      <div class="demo">
+        <svg class="badge float" viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="#ffec27"/><rect x="1" y="1" width="6" height="6" fill="#ff004d"/><rect x="3" y="2" width="2" height="4" fill="#fff1e8"/><rect x="2" y="3" width="4" height="2" fill="#fff1e8"/></svg>
+        <svg class="badge float" style="animation-delay:.3s" viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="#29adff"/><rect x="2" y="1" width="4" height="2" fill="#fff1e8"/><rect x="1" y="3" width="6" height="3" fill="#00e436"/><rect x="3" y="6" width="2" height="1" fill="#ffa300"/></svg>
+        <svg class="badge float" style="animation-delay:.6s" viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="#83769c"/><rect x="1" y="2" width="6" height="4" fill="#0f0f1b"/><rect x="2" y="1" width="1" height="1" fill="#ffec27"/><rect x="5" y="1" width="1" height="1" fill="#ffec27"/><rect x="3" y="3" width="2" height="2" fill="#ffec27"/></svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>2 · APPARITION DE LIEU "SPAWN"</h3>
+      <p>Au mint réussi, le marqueur <b>tombe du ciel</b> et rebondit sur la carte (anim <code>steps()</code> 4 frames : chute → écrasement → rebond → repos), avec un flash blanc dur. Lecture immédiate du gain de territoire, façon objet ramassé dans un jeu.</p>
+      <div class="demo">
+        <svg class="badge spawn" viewBox="0 0 13 16" shape-rendering="crispEdges">
+          <rect x="2" y="0" width="9" height="9" fill="#00e436"/>
+          <rect x="0" y="2" width="2" height="5" fill="#00e436"/>
+          <rect x="11" y="2" width="2" height="5" fill="#00e436"/>
+          <rect x="2" y="0" width="9" height="9" fill="none" stroke="#fff1e8" stroke-width="1"/>
+          <rect x="5" y="9" width="3" height="4" fill="#00e436" stroke="#fff1e8" stroke-width="0.5"/>
+          <rect x="5" y="3" width="3" height="3" fill="#0f0f1b"/>
+        </svg>
+        <span style="font-size:11px;color:#83769c">↳ chute + rebond</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>3 · STREAK & TERRITOIRE EN FEU</h3>
+      <p>Série de jours consécutifs avec un mint = compteur <b>🔥 streak</b> en haut de la carte. Les lieux qu'un gardien risque de perdre (contestés) clignotent en <b>rouge pulsé</b>. Crée tension et retour quotidien sans casser la DA monochrome-pixel.</p>
+      <div class="demo">
+        <span class="chip" style="border-color:#ffa300"><span class="pic" style="background:#ffa300"></span> STREAK 12 J</span>
+        <span class="chip" style="border-color:#ff004d;animation:float .8s steps(2) infinite alternate"><span class="pic" style="background:#ff004d"></span> CONTESTÉ ×2</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="page">
+  Maquettes statiques — <b>PlaceKeepr</b> · palette Pico-8 stricte · aucun border-radius / dégradé / flou · bordures 3px · ombres dures 4px
+</footer>
+
+</body>
+</html>

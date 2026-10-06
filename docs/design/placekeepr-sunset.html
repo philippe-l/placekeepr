@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlaceKeepr — Référence « Coucher de soleil »</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  /* =====================================================================
+     PLACEKEEPR — PALETTE FIGÉE « COUCHER DE SOLEIL CHAUD »
+     Référence DA · pixel-art · bordures 3px · ombres dures 4px
+     ===================================================================== */
+  :root{
+    --b:3px;
+    --shadow:4px 4px 0 0 var(--ink);
+    --shadow-lg:6px 6px 0 0 var(--ink);
+
+    /* UI — Sunset (contrastes peaufinés) */
+    --bg:#fff2e0;        /* crème */
+    --surface:#ffe1bf;   /* sable / pêche */
+    --text:#3a1f2e;      /* prune foncé */
+    --muted:#9c5a4a;     /* terracotta atténué */
+    --border:#3a1f2e;
+    --ink:#4a1f33;       /* ombre dure (maron chaud) */
+    --primary:#e6541f;   --on-primary:#fff2e0;   /* corail — action */
+    --danger:#d11a55;    --on-danger:#fff2e0;    /* framboise — danger */
+    --gold:#b8730a;      --on-gold:#fff2e0;      /* ambre profond — réputation/or */
+    --accent:#1f8f80;    --on-accent:#fff2e0;    /* teal — like/visites */
+    --fee:#d9701a;       /* orange — coût */
+    --pink:#e85d92;      /* rose */
+    --secondary:#9c5a4a; /* secondaire */
+
+    /* CARTE : toujours sombre (noir) */
+    --map-bg:#08080f;
+    --map-water:#16233f;
+    --map-road:#372f53;
+    --map-hwy:#a8600f;
+    --map-stroke:#fff1e8;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:#1a0f16}
+  body{
+    min-height:100vh;background:var(--bg);color:var(--text);
+    font-family:"Courier New",ui-monospace,monospace;font-size:13px;line-height:1.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M32 0H0V32' fill='none' stroke='%233a1f2e' stroke-opacity='0.10' stroke-width='1'/%3E%3C/svg%3E");
+    background-size:32px 32px;
+  }
+  .pix{font-family:"Press Start 2P",monospace}
+  img,svg{image-rendering:pixelated;image-rendering:crisp-edges}
+
+  /* en-tête */
+  header.page{padding:34px 24px 6px;text-align:center}
+  header.page h1{font-family:"Press Start 2P",monospace;font-size:24px;color:var(--primary);text-shadow:3px 3px 0 var(--ink);letter-spacing:1px}
+  header.page .tag{margin-top:14px;display:inline-block;background:var(--surface);border:var(--b) solid var(--border);box-shadow:var(--shadow);padding:8px 12px;font-size:12px}
+  header.page .tag b{color:var(--gold)}
+
+  .deck{display:flex;flex-wrap:wrap;gap:48px 40px;justify-content:center;align-items:flex-start;padding:34px 24px 60px}
+  .frame-wrap{width:300px}
+  .label{font-family:"Press Start 2P",monospace;font-size:11px;color:var(--gold);margin-bottom:12px;text-align:center;line-height:1.6}
+  .label .n{color:var(--on-gold);background:var(--gold);padding:3px 6px;margin-right:6px}
+
+  .phone{width:300px;height:666px;background:var(--bg);border:var(--b) solid var(--border);box-shadow:var(--shadow-lg);position:relative;overflow:hidden;display:flex;flex-direction:column}
+  .statusbar{height:22px;flex:0 0 22px;background:var(--surface);border-bottom:var(--b) solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 8px;font-size:9px;color:var(--text);font-family:"Press Start 2P",monospace;z-index:30}
+  .statusbar .dots{display:flex;gap:3px}
+  .statusbar .dots i{width:6px;height:6px;background:var(--primary);display:block}
+  .statusbar .dots i.off{background:var(--muted)}
+  .screen{flex:1 1 auto;position:relative;overflow:hidden}
+
+  /* ---------- BOUTON + ÉTATS D'INTERACTION (handoff) ---------- */
+  .btn{
+    font-family:"Press Start 2P",monospace;font-size:11px;color:var(--on-primary);background:var(--primary);
+    border:var(--b) solid var(--border);box-shadow:var(--shadow);padding:13px 10px;text-align:center;
+    cursor:pointer;text-transform:uppercase;user-select:none;line-height:1.4;
+    transition:none;outline:none;
+  }
+  /* hover : le bouton « se soulève » (ombre plus longue) */
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 0 var(--ink)}
+  /* focus clavier : liseré pointillé net */
+  .btn:focus-visible{outline:3px dashed var(--gold);outline-offset:3px}
+  /* pressed : le bouton s'enfonce, l'ombre disparaît */
+  .btn:active{transform:translate(4px,4px);box-shadow:0 0 0 0 var(--ink)}
+  .btn--red{background:var(--danger);color:var(--on-danger)}
+  .btn--ghost{background:var(--surface);color:var(--text)}
+  .btn--blue{background:var(--accent);color:var(--on-accent)}
+  .btn--yellow{background:var(--gold);color:var(--on-gold)}
+
+  .chip{display:inline-flex;align-items:center;gap:5px;border:var(--b) solid var(--border);background:var(--bg);padding:4px 7px;font-size:11px}
+  .chip .pic{width:10px;height:10px;display:block}
+
+  /* ÉCRAN 1 : CARTE (sombre) */
+  .map{position:absolute;inset:0;background:var(--map-bg);overflow:hidden}
+  .map .grid{position:absolute;inset:0;opacity:.5;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M24 0H0V24' fill='none' stroke='%231d2b53' stroke-width='1'/%3E%3C/svg%3E");background-size:24px 24px}
+  .water{position:absolute;background:var(--map-water)}
+  .road{position:absolute;background:var(--map-road)}
+  .hwy{position:absolute;background:var(--map-hwy)}
+  .coord{position:absolute;top:10px;left:10px;right:10px;z-index:20;background:var(--bg);border:var(--b) solid var(--primary);box-shadow:var(--shadow);padding:8px 10px;display:flex;justify-content:space-between;align-items:center}
+  .coord .lat{font-family:"Press Start 2P",monospace;font-size:10px;color:var(--primary);line-height:1.7}
+  .coord .acc{font-size:10px;color:var(--text);text-align:right}
+  .coord .acc b{color:var(--gold)}
+  .marker{position:absolute;transform:translate(-50%,-100%);z-index:15;cursor:pointer}
+  .marker:hover{transform:translate(-50%,-100%) translateY(-3px)}
+  .me-here{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);z-index:14;width:14px;height:14px;background:var(--accent);border:var(--b) solid var(--map-stroke);animation:ping 1s steps(2) infinite}
+  @keyframes ping{0%{box-shadow:0 0 0 4px rgba(255,255,255,.18)}100%{box-shadow:0 0 0 12px rgba(255,255,255,0)}}
+  .legend{position:absolute;left:10px;bottom:84px;z-index:20;background:var(--bg);border:var(--b) solid var(--border);box-shadow:var(--shadow);padding:7px 8px;font-size:10px;display:flex;flex-direction:column;gap:5px}
+  .legend div{display:flex;align-items:center;gap:6px}
+  .legend i{width:11px;height:11px;display:block;border:2px solid var(--border)}
+  .mint-bar{position:absolute;left:10px;right:10px;bottom:10px;z-index:20}
+  .mint-bar .btn{width:100%;font-size:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+
+  /* ÉCRAN 2 : FICHE LIEU */
+  .sheet{position:absolute;inset:0;display:flex;flex-direction:column;overflow:auto}
+  .photo{width:100%;height:170px;flex:0 0 170px;border-bottom:var(--b) solid var(--border);position:relative;background:var(--surface);overflow:hidden}
+  .photo svg{width:100%;height:100%;display:block}
+  .photo .badge-keep{position:absolute;top:8px;right:8px;background:var(--gold);color:var(--on-gold);font-family:"Press Start 2P",monospace;font-size:8px;border:var(--b) solid var(--border);padding:5px 6px;box-shadow:var(--shadow)}
+  .body{padding:12px;display:flex;flex-direction:column;gap:11px}
+  .place-name{font-family:"Press Start 2P",monospace;font-size:13px;color:var(--text);line-height:1.6}
+  .place-sub{font-size:11px;color:var(--muted)}
+  .guardian{display:flex;align-items:center;gap:9px;background:var(--surface);border:var(--b) solid var(--border);box-shadow:var(--shadow);padding:8px}
+  .guardian svg{width:34px;height:34px;flex:0 0 34px;border:var(--b) solid var(--border)}
+  .guardian .g-name{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--gold);line-height:1.6}
+  .guardian .g-meta{font-size:10px;color:var(--text)}
+  .stats{display:flex;gap:8px}
+  .stat{flex:1;text-align:center;background:var(--bg);border:var(--b) solid var(--border);padding:8px 4px}
+  .stat .v{font-family:"Press Start 2P",monospace;font-size:13px}
+  .stat .v.likes{color:var(--pink)}
+  .stat .v.visits{color:var(--accent)}
+  .stat .v.rare{color:var(--gold)}
+  .stat .k{font-size:9px;color:var(--muted);margin-top:5px;text-transform:uppercase}
+  .like-row{display:flex;gap:8px}
+  .like-row .btn{flex:1}
+  .history{display:flex;flex-direction:column;gap:6px}
+  .history .h-title{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--muted);margin-bottom:2px}
+  .h-item{display:flex;align-items:center;gap:8px;font-size:11px;border-left:var(--b) solid var(--muted);padding:3px 0 3px 8px}
+  .h-item b{color:var(--text)}
+  .h-item .dot{width:8px;height:8px;flex:0 0 8px}
+
+  /* ÉCRAN 3 : PROFIL */
+  .profile{position:absolute;inset:0;display:flex;flex-direction:column;overflow:auto;padding:12px;gap:12px}
+  .prof-head{display:flex;gap:11px;align-items:center}
+  .prof-head .av{width:64px;height:64px;flex:0 0 64px;border:var(--b) solid var(--border);box-shadow:var(--shadow)}
+  .prof-head .who .name{font-family:"Press Start 2P",monospace;font-size:13px;color:var(--text);line-height:1.6}
+  .prof-head .who .rank{display:inline-block;margin-top:6px;background:var(--gold);color:var(--on-gold);font-family:"Press Start 2P",monospace;font-size:8px;padding:4px 6px;border:2px solid var(--border)}
+  .xp{background:var(--surface);border:var(--b) solid var(--border);box-shadow:var(--shadow);padding:9px}
+  .xp .lab{display:flex;justify-content:space-between;font-family:"Press Start 2P",monospace;font-size:8px;margin-bottom:7px}
+  .xp .lab .lv{color:var(--gold)}
+  .xp .lab .pts{color:var(--primary)}
+  .xpbar{height:16px;background:var(--bg);border:var(--b) solid var(--border);display:flex;padding:2px;gap:2px}
+  .xpbar i{flex:1;background:var(--bg)}
+  .xpbar i.on{background:var(--primary)}
+  .xpbar i.half{background:var(--gold)}
+  .roy{display:flex;gap:8px}
+  .roy .box{flex:1;background:var(--bg);border:var(--b) solid var(--border);box-shadow:var(--shadow);padding:9px;text-align:center}
+  .roy .box .v{font-family:"Press Start 2P",monospace;font-size:13px;color:var(--gold)}
+  .roy .box .v.sm{font-size:11px;color:var(--primary)}
+  .roy .box .v.acc{font-size:11px;color:var(--accent)}
+  .roy .box .k{font-size:9px;color:var(--muted);margin-top:5px;text-transform:uppercase}
+  .grid-title{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--muted)}
+  .keep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+  .keep-grid .cell{aspect-ratio:1;border:var(--b) solid var(--border);position:relative;overflow:hidden;background:var(--surface);cursor:pointer}
+  .keep-grid .cell:hover{box-shadow:var(--shadow)}
+  .keep-grid .cell svg{width:100%;height:100%;display:block}
+  .keep-grid .cell.locked{display:flex;align-items:center;justify-content:center;background:var(--bg)}
+  .keep-grid .cell.locked span{font-family:"Press Start 2P",monospace;font-size:16px;color:var(--muted)}
+  .keep-grid .cell .crown{position:absolute;top:2px;right:2px;width:12px;height:12px}
+
+  /* ÉCRAN 4 : MINT */
+  .confirm{position:absolute;inset:0;display:flex;flex-direction:column;padding:12px;gap:11px}
+  .confirm .ct{font-family:"Press Start 2P",monospace;font-size:12px;color:var(--primary);text-align:center;line-height:1.7;margin-top:4px}
+  .preview{height:150px;flex:0 0 150px;border:var(--b) solid var(--border);box-shadow:var(--shadow);overflow:hidden;position:relative;background:var(--surface)}
+  .preview svg{width:100%;height:100%;display:block}
+  .preview .live{position:absolute;top:6px;left:6px;background:var(--danger);color:var(--on-danger);font-family:"Press Start 2P",monospace;font-size:7px;padding:4px 5px;border:2px solid var(--border)}
+  .rows{display:flex;flex-direction:column;gap:7px}
+  .row{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:var(--b) solid var(--border);padding:8px 9px;font-size:11px}
+  .row .k{color:var(--muted);font-size:10px;text-transform:uppercase}
+  .row .v{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--text)}
+  .row .v.fee{color:var(--fee)}
+  .row .v.coin{color:var(--primary)}
+  .confirm .total{border-color:var(--gold)}
+  .confirm .total .v{color:var(--gold);font-size:11px}
+  .confirm .actions{margin-top:auto;display:flex;flex-direction:column;gap:9px}
+  .confirm .actions .btn{width:100%}
+  .confirm .warn{font-size:10px;color:var(--muted);text-align:center;line-height:1.6}
+  .confirm .warn b{color:var(--danger)}
+
+  /* annotations */
+  .anno{width:300px;margin-top:14px;background:var(--bg);border:var(--b) dashed var(--pink);box-shadow:var(--shadow);padding:10px}
+  .anno h4{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--pink);margin-bottom:8px;line-height:1.6}
+  .anno p{font-size:11px;color:var(--text);margin-bottom:7px}
+  .anno p b{color:var(--gold)}
+  .anno p:last-child{margin-bottom:0}
+
+  /* =====================================================================
+     BANDEAU HANDOFF DEV — tokens + états
+     ===================================================================== */
+  .handoff{margin:0 24px 30px;border:var(--b) solid var(--border);box-shadow:var(--shadow-lg);background:var(--surface);padding:20px}
+  .handoff h2{font-family:"Press Start 2P",monospace;font-size:14px;color:var(--primary);text-shadow:2px 2px 0 var(--ink);margin-bottom:18px}
+  .handoff h3{font-family:"Press Start 2P",monospace;font-size:10px;color:var(--text);margin:14px 0 12px}
+  .tok-grid{display:flex;flex-wrap:wrap;gap:10px}
+  .tok{background:var(--bg);border:var(--b) solid var(--border);box-shadow:var(--shadow);padding:8px;width:140px}
+  .tok .sw{height:30px;border:2px solid var(--border);margin-bottom:6px}
+  .tok .nm{font-family:"Press Start 2P",monospace;font-size:7px;color:var(--text);line-height:1.5}
+  .tok .hx{font-size:10px;color:var(--muted)}
+
+  .states{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end;margin-top:6px}
+  .state{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .state .cap{font-family:"Press Start 2P",monospace;font-size:8px;color:var(--muted)}
+  /* boutons statiques figés pour montrer chaque état au repos */
+  .st-btn{font-family:"Press Start 2P",monospace;font-size:11px;color:var(--on-primary);background:var(--primary);border:var(--b) solid var(--border);padding:13px 16px;text-transform:uppercase}
+  .st-default{box-shadow:var(--shadow)}
+  .st-hover{box-shadow:6px 6px 0 0 var(--ink);transform:translate(-2px,-2px)}
+  .st-pressed{box-shadow:0 0 0 0 var(--ink);transform:translate(4px,4px)}
+  .st-focus{box-shadow:var(--shadow);outline:3px dashed var(--gold);outline-offset:3px}
+  .st-disabled{box-shadow:var(--shadow);background:var(--secondary);color:var(--bg);opacity:.7}
+  .handoff .note{font-size:11px;color:var(--text);margin-top:14px;line-height:1.6}
+  .handoff .note b{color:var(--gold)}
+  .handoff .live{font-size:11px;color:var(--muted);margin-top:8px}
+
+  footer.page{text-align:center;padding:0 24px 50px;color:var(--muted);font-size:11px}
+  footer.page b{color:var(--primary)}
+</style>
+</head>
+<body>
+
+  <header class="page">
+    <h1>PLACEKEEPR</h1>
+    <div class="tag">Référence figée · palette <b>« Coucher de soleil chaud »</b> · 1080×2400 · carte sombre</div>
+  </header>
+
+  <div class="deck">
+
+    <!-- ÉCRAN 1 : CARTE -->
+    <div class="frame-wrap">
+      <div class="label"><span class="n">1</span>CARTE</div>
+      <div class="phone">
+        <div class="statusbar"><span>PLACEKEEPR</span><span class="dots"><i></i><i></i><i></i><i class="off"></i></span></div>
+        <div class="screen">
+          <div class="map">
+            <div class="grid"></div>
+            <div class="water" style="top:0;left:-20px;width:120px;height:90px"></div>
+            <div class="water" style="bottom:120px;right:-30px;width:140px;height:160px"></div>
+            <div class="water" style="top:300px;left:-30px;width:60px;height:120px"></div>
+            <div class="water" style="top:80px;left:60px;width:18px;height:260px"></div>
+            <div class="water" style="top:330px;left:60px;width:120px;height:18px"></div>
+            <div class="road" style="top:0;left:140px;width:6px;height:100%"></div>
+            <div class="road" style="top:200px;left:0;width:100%;height:6px"></div>
+            <div class="road" style="top:430px;left:0;width:100%;height:6px"></div>
+            <div class="road" style="top:0;left:230px;width:6px;height:100%"></div>
+            <div class="hwy" style="top:0;width:8px;height:100%;transform:skewX(-12deg);left:95px"></div>
+            <div class="hwy" style="top:120px;left:0;width:100%;height:8px"></div>
+            <div class="coord">
+              <div class="lat">48.8584°N<br>2.2945°E</div>
+              <div class="acc">PRÉCISION<br><b>±4 m</b> · GPS</div>
+            </div>
+            <div class="marker" style="left:42%;top:40%">
+              <svg width="26" height="32" viewBox="0 0 13 16" shape-rendering="crispEdges">
+                <rect x="2" y="0" width="9" height="9" fill="var(--primary)"/><rect x="0" y="2" width="2" height="5" fill="var(--primary)"/><rect x="11" y="2" width="2" height="5" fill="var(--primary)"/>
+                <rect x="2" y="0" width="9" height="9" fill="none" stroke="var(--map-stroke)" stroke-width="1"/><rect x="5" y="9" width="3" height="4" fill="var(--primary)" stroke="var(--map-stroke)" stroke-width="0.5"/>
+                <rect x="6" y="2" width="1" height="5" fill="var(--ink)"/><rect x="4" y="4" width="5" height="1" fill="var(--ink)"/><rect x="5" y="3" width="3" height="3" fill="var(--ink)"/>
+              </svg>
+            </div>
+            <div class="marker" style="left:70%;top:62%">
+              <svg width="26" height="32" viewBox="0 0 13 16" shape-rendering="crispEdges">
+                <rect x="2" y="0" width="9" height="9" fill="var(--primary)"/><rect x="0" y="2" width="2" height="5" fill="var(--primary)"/><rect x="11" y="2" width="2" height="5" fill="var(--primary)"/>
+                <rect x="2" y="0" width="9" height="9" fill="none" stroke="var(--map-stroke)" stroke-width="1"/><rect x="5" y="9" width="3" height="4" fill="var(--primary)" stroke="var(--map-stroke)" stroke-width="0.5"/><rect x="5" y="3" width="3" height="3" fill="var(--ink)"/>
+              </svg>
+            </div>
+            <div class="marker" style="left:24%;top:30%">
+              <svg width="22" height="27" viewBox="0 0 13 16" shape-rendering="crispEdges">
+                <rect x="2" y="0" width="9" height="9" fill="var(--accent)"/><rect x="0" y="2" width="2" height="5" fill="var(--accent)"/><rect x="11" y="2" width="2" height="5" fill="var(--accent)"/>
+                <rect x="2" y="0" width="9" height="9" fill="none" stroke="var(--map-stroke)" stroke-width="1"/><rect x="5" y="9" width="3" height="4" fill="var(--accent)" stroke="var(--map-stroke)" stroke-width="0.5"/><rect x="5" y="3" width="3" height="3" fill="var(--ink)"/>
+              </svg>
+            </div>
+            <div class="marker" style="left:85%;top:34%">
+              <svg width="22" height="27" viewBox="0 0 13 16" shape-rendering="crispEdges">
+                <rect x="2" y="0" width="9" height="9" fill="var(--accent)"/><rect x="0" y="2" width="2" height="5" fill="var(--accent)"/><rect x="11" y="2" width="2" height="5" fill="var(--accent)"/>
+                <rect x="2" y="0" width="9" height="9" fill="none" stroke="var(--map-stroke)" stroke-width="1"/><rect x="5" y="9" width="3" height="4" fill="var(--accent)" stroke="var(--map-stroke)" stroke-width="0.5"/><rect x="5" y="3" width="3" height="3" fill="var(--ink)"/>
+              </svg>
+            </div>
+            <div class="marker" style="left:55%;top:78%">
+              <svg width="22" height="27" viewBox="0 0 13 16" shape-rendering="crispEdges">
+                <rect x="2" y="0" width="9" height="9" fill="var(--pink)"/><rect x="0" y="2" width="2" height="5" fill="var(--pink)"/><rect x="11" y="2" width="2" height="5" fill="var(--pink)"/>
+                <rect x="2" y="0" width="9" height="9" fill="none" stroke="var(--map-stroke)" stroke-width="1"/><rect x="5" y="9" width="3" height="4" fill="var(--pink)" stroke="var(--map-stroke)" stroke-width="0.5"/><rect x="5" y="3" width="3" height="3" fill="var(--ink)"/>
+              </svg>
+            </div>
+            <div class="me-here"></div>
+            <div class="legend">
+              <div><i style="background:var(--primary)"></i> MES LIEUX</div>
+              <div><i style="background:var(--accent)"></i> AUTRES GARDIENS</div>
+            </div>
+            <div class="mint-bar"><div class="btn" tabindex="0">▶ MINT THIS PLACE</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="anno">
+        <h4>// NOTE DA</h4>
+        <p>Sur le noir de la carte, le corail des marqueurs « mes lieux » et le teal des autres gardiens <b>claquent</b> — meilleure séparation visuelle que la version sombre.</p>
+      </div>
+    </div>
+
+    <!-- ÉCRAN 2 : FICHE LIEU -->
+    <div class="frame-wrap">
+      <div class="label"><span class="n">2</span>FICHE LIEU</div>
+      <div class="phone">
+        <div class="statusbar"><span>LIEU</span><span class="dots"><i></i><i></i><i></i><i class="off"></i></span></div>
+        <div class="screen">
+          <div class="sheet">
+            <div class="photo">
+              <svg viewBox="0 0 64 34" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges">
+                <rect width="64" height="34" fill="var(--surface)"/><rect y="0" width="64" height="14" fill="var(--bg)"/>
+                <rect x="50" y="3" width="6" height="6" fill="var(--gold)"/><rect x="52" y="3" width="4" height="6" fill="var(--surface)"/>
+                <rect x="8" y="3" width="1" height="1" fill="var(--text)"/><rect x="20" y="6" width="1" height="1" fill="var(--text)"/><rect x="44" y="2" width="1" height="1" fill="var(--gold)"/>
+                <rect y="22" width="64" height="12" fill="var(--secondary)"/>
+                <rect x="29" y="8" width="6" height="16" fill="var(--text)"/><rect x="29" y="11" width="6" height="2" fill="var(--danger)"/><rect x="29" y="16" width="6" height="2" fill="var(--danger)"/>
+                <rect x="28" y="6" width="8" height="3" fill="var(--fee)"/><rect x="30" y="3" width="4" height="3" fill="var(--gold)"/>
+                <rect x="36" y="4" width="10" height="1" fill="var(--gold)"/><rect x="18" y="4" width="10" height="1" fill="var(--gold)"/>
+                <rect x="30" y="26" width="4" height="1" fill="var(--accent)"/><rect x="28" y="29" width="8" height="1" fill="var(--accent)"/>
+              </svg>
+              <div class="badge-keep">★ GARDÉ</div>
+            </div>
+            <div class="body">
+              <div>
+                <div class="place-name">PHARE DU VIEUX PORT</div>
+                <div class="place-sub">48.8584°N · 2.2945°E · minté il y a 3 mois</div>
+              </div>
+              <div class="guardian">
+                <svg viewBox="0 0 8 8" shape-rendering="crispEdges">
+                  <rect width="8" height="8" fill="var(--fee)"/><rect x="2" y="1" width="4" height="3" fill="var(--text)"/><rect x="2" y="4" width="4" height="3" fill="var(--primary)"/>
+                  <rect x="3" y="2" width="1" height="1" fill="var(--ink)"/><rect x="5" y="2" width="1" height="1" fill="var(--ink)"/>
+                </svg>
+                <div>
+                  <div class="g-name">GARDIEN · PIXLR_44</div>
+                  <div class="g-meta">Réputation 2 480 ⚡ · niv. 7</div>
+                </div>
+              </div>
+              <div class="stats">
+                <div class="stat"><div class="v visits">1 204</div><div class="k">visites</div></div>
+                <div class="stat"><div class="v likes">372</div><div class="k">likes</div></div>
+                <div class="stat"><div class="v rare">A+</div><div class="k">rareté</div></div>
+              </div>
+              <div class="like-row">
+                <div class="btn btn--blue" tabindex="0">♥ LIKE</div>
+                <div class="btn btn--ghost" tabindex="0">↗ PARTAGER</div>
+              </div>
+              <div class="history">
+                <div class="h-title">HISTORIQUE</div>
+                <div class="h-item"><span class="dot" style="background:var(--primary)"></span> <b>vous</b> avez visité — auj.</div>
+                <div class="h-item"><span class="dot" style="background:var(--pink)"></span> <b>n0va</b> a liké — hier</div>
+                <div class="h-item"><span class="dot" style="background:var(--gold)"></span> royalties <b>+0.04 ◎</b> — 2 j</div>
+                <div class="h-item"><span class="dot" style="background:var(--accent)"></span> <b>retr0</b> a visité — 3 j</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="anno">
+        <h4>// NOTE DA</h4>
+        <p>Texte foncé <b>prune</b> sur surfaces crème/sable : contraste largement au-dessus du seuil AA. Les captions secondaires passent en terracotta atténué.</p>
+      </div>
+    </div>
+
+    <!-- ÉCRAN 3 : PROFIL -->
+    <div class="frame-wrap">
+      <div class="label"><span class="n">3</span>PROFIL GARDIEN</div>
+      <div class="phone">
+        <div class="statusbar"><span>PROFIL</span><span class="dots"><i></i><i></i><i class="off"></i><i class="off"></i></span></div>
+        <div class="screen">
+          <div class="profile">
+            <div class="prof-head">
+              <svg class="av" viewBox="0 0 8 8" shape-rendering="crispEdges">
+                <rect width="8" height="8" fill="var(--secondary)"/><rect x="1" y="1" width="6" height="2" fill="var(--gold)"/><rect x="1" y="3" width="6" height="3" fill="var(--text)"/>
+                <rect x="2" y="4" width="1" height="1" fill="var(--bg)"/><rect x="5" y="4" width="1" height="1" fill="var(--bg)"/><rect x="3" y="6" width="2" height="1" fill="var(--danger)"/><rect x="2" y="7" width="4" height="1" fill="var(--primary)"/>
+              </svg>
+              <div class="who">
+                <div class="name">PIXLR_44</div>
+                <div class="rank">★ GARDIEN OR</div>
+              </div>
+            </div>
+            <div class="xp">
+              <div class="lab"><span class="lv">NIVEAU 7</span><span class="pts">2480 / 3000 ⚡</span></div>
+              <div class="xpbar">
+                <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="half"></i><i></i>
+              </div>
+            </div>
+            <div class="roy">
+              <div class="box"><div class="v">12.8 ◎</div><div class="k">royalties</div></div>
+              <div class="box"><div class="v sm">18</div><div class="k">lieux gardés</div></div>
+              <div class="box"><div class="v acc">5.1k</div><div class="k">visites</div></div>
+            </div>
+            <div class="grid-title">LIEUX GARDÉS</div>
+            <div class="keep-grid">
+              <div class="cell">
+                <svg viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="var(--surface)"/><rect x="3" y="1" width="2" height="5" fill="var(--text)"/><rect x="2" y="6" width="4" height="2" fill="var(--primary)"/><rect x="3" y="0" width="2" height="1" fill="var(--gold)"/></svg>
+                <svg class="crown" viewBox="0 0 8 8" shape-rendering="crispEdges"><rect x="1" y="3" width="6" height="3" fill="var(--gold)"/><rect x="1" y="1" width="1" height="2" fill="var(--gold)"/><rect x="4" y="1" width="1" height="2" fill="var(--gold)"/><rect x="6" y="1" width="1" height="2" fill="var(--gold)"/></svg>
+              </div>
+              <div class="cell"><svg viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="var(--bg)"/><rect x="1" y="4" width="6" height="4" fill="var(--secondary)"/><rect x="2" y="2" width="4" height="2" fill="var(--danger)"/><rect x="3" y="5" width="2" height="3" fill="var(--fee)"/></svg></div>
+              <div class="cell"><svg viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="var(--surface)"/><rect x="0" y="5" width="8" height="3" fill="var(--primary)"/><rect x="2" y="2" width="4" height="3" fill="var(--text)"/><rect x="5" y="1" width="1" height="1" fill="var(--gold)"/></svg></div>
+              <div class="cell"><svg viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="var(--bg)"/><rect x="1" y="1" width="6" height="6" fill="var(--accent)"/><rect x="2" y="2" width="4" height="4" fill="var(--surface)"/><rect x="3" y="3" width="2" height="2" fill="var(--gold)"/></svg></div>
+              <div class="cell"><svg viewBox="0 0 8 8" shape-rendering="crispEdges"><rect width="8" height="8" fill="var(--surface)"/><rect x="2" y="3" width="4" height="5" fill="var(--pink)"/><rect x="3" y="1" width="2" height="2" fill="var(--text)"/></svg></div>
+              <div class="cell locked"><span>?</span></div>
+              <div class="cell locked"><span>?</span></div>
+              <div class="cell locked"><span>?</span></div>
+              <div class="cell locked"><span>+</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="anno">
+        <h4>// NOTE DA</h4>
+        <p>L'<b>or ambré</b> tient le rôle réputation partout (rang, barre XP, royalties) ; assez foncé pour rester lisible sur le crème.</p>
+      </div>
+    </div>
+
+    <!-- ÉCRAN 4 : MINT -->
+    <div class="frame-wrap">
+      <div class="label"><span class="n">4</span>CONFIRMER LE MINT</div>
+      <div class="phone">
+        <div class="statusbar"><span>MINT</span><span class="dots"><i></i><i></i><i></i><i></i></span></div>
+        <div class="screen">
+          <div class="confirm">
+            <div class="ct">CAPTURER<br>CE LIEU ?</div>
+            <div class="preview">
+              <svg viewBox="0 0 64 36" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges">
+                <rect width="64" height="36" fill="var(--bg)"/><rect y="0" width="64" height="16" fill="var(--surface)"/>
+                <rect x="44" y="6" width="8" height="8" fill="var(--fee)"/><rect x="46" y="4" width="4" height="2" fill="var(--gold)"/>
+                <rect y="16" width="64" height="20" fill="var(--secondary)"/>
+                <rect x="6" y="10" width="16" height="10" fill="var(--surface)"/><rect x="12" y="8" width="4" height="4" fill="var(--text)"/>
+                <rect x="38" y="12" width="18" height="10" fill="var(--bg)"/><rect x="44" y="10" width="6" height="4" fill="var(--text)"/>
+                <rect x="4" y="24" width="3" height="6" fill="var(--fee)"/><rect x="2" y="18" width="7" height="7" fill="var(--primary)"/>
+                <rect x="55" y="26" width="3" height="6" fill="var(--fee)"/><rect x="53" y="20" width="7" height="7" fill="var(--primary)"/>
+                <rect y="30" width="64" height="6" fill="var(--primary)"/>
+              </svg>
+              <div class="live">● APERÇU</div>
+            </div>
+            <div class="rows">
+              <div class="row"><span class="k">Coordonnées</span><span class="v coin">48.8584N 2.2945E</span></div>
+              <div class="row"><span class="k">Réseau</span><span class="v">SOLANA</span></div>
+              <div class="row"><span class="k">Frais de mint</span><span class="v fee">~0.012 ◎</span></div>
+              <div class="row"><span class="k">Gas</span><span class="v fee">~0.0004 ◎</span></div>
+              <div class="row total"><span class="k">Total estimé</span><span class="v">~0.0124 ◎</span></div>
+            </div>
+            <div class="actions">
+              <div class="warn">Vous serez le <b>1ᵉʳ gardien</b> de ce lieu.<br>Action irréversible on-chain.</div>
+              <div class="btn" tabindex="0">✓ CONFIRM</div>
+              <div class="btn btn--red" tabindex="0">✕ CANCEL</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="anno">
+        <h4>// NOTE DA</h4>
+        <p>Hiérarchie d'action préservée : <b>CONFIRM corail</b> (primaire), <b>CANCEL framboise</b>, frais en orange, total en or.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ====================== HANDOFF DEV ====================== -->
+  <div class="handoff">
+    <h2>HANDOFF — TOKENS & ÉTATS</h2>
+
+    <h3>JETONS DE COULEUR (CSS variables)</h3>
+    <div class="tok-grid">
+      <div class="tok"><div class="sw" style="background:#fff2e0"></div><div class="nm">--bg</div><div class="hx">#fff2e0</div></div>
+      <div class="tok"><div class="sw" style="background:#ffe1bf"></div><div class="nm">--surface</div><div class="hx">#ffe1bf</div></div>
+      <div class="tok"><div class="sw" style="background:#3a1f2e"></div><div class="nm">--text / --border</div><div class="hx">#3a1f2e</div></div>
+      <div class="tok"><div class="sw" style="background:#4a1f33"></div><div class="nm">--ink (ombre)</div><div class="hx">#4a1f33</div></div>
+      <div class="tok"><div class="sw" style="background:#e6541f"></div><div class="nm">--primary (action)</div><div class="hx">#e6541f</div></div>
+      <div class="tok"><div class="sw" style="background:#d11a55"></div><div class="nm">--danger</div><div class="hx">#d11a55</div></div>
+      <div class="tok"><div class="sw" style="background:#b8730a"></div><div class="nm">--gold (réput.)</div><div class="hx">#b8730a</div></div>
+      <div class="tok"><div class="sw" style="background:#1f8f80"></div><div class="nm">--accent (like)</div><div class="hx">#1f8f80</div></div>
+      <div class="tok"><div class="sw" style="background:#d9701a"></div><div class="nm">--fee (coût)</div><div class="hx">#d9701a</div></div>
+      <div class="tok"><div class="sw" style="background:#e85d92"></div><div class="nm">--pink</div><div class="hx">#e85d92</div></div>
+      <div class="tok"><div class="sw" style="background:#9c5a4a"></div><div class="nm">--secondary / muted</div><div class="hx">#9c5a4a</div></div>
+    </div>
+
+    <h3>ÉTATS DU BOUTON PRIMAIRE</h3>
+    <div class="states">
+      <div class="state"><div class="st-btn st-default">MINT</div><div class="cap">DEFAULT</div></div>
+      <div class="state"><div class="st-btn st-hover">MINT</div><div class="cap">HOVER</div></div>
+      <div class="state"><div class="st-btn st-pressed">MINT</div><div class="cap">PRESSED</div></div>
+      <div class="state"><div class="st-btn st-focus">MINT</div><div class="cap">FOCUS</div></div>
+      <div class="state"><div class="st-btn st-disabled">MINT</div><div class="cap">DISABLED</div></div>
+    </div>
+    <p class="note">Mécanique : <b>default</b> ombre dure 4px ; <b>hover</b> le bouton se soulève (ombre 6px, décalage −2px) ; <b>pressed</b> il s'enfonce (translate +4px, ombre nulle) ; <b>focus clavier</b> liseré pointillé or ; <b>disabled</b> en secondaire désaturé. Aucune transition douce — tout est en paliers, fidèle au pixel.</p>
+    <p class="live">↳ Les boutons des maquettes ci-dessus sont interactifs : survole-les et clique pour voir l'enfoncement en vrai.</p>
+  </div>
+
+  <footer class="page">
+    Référence <b>PlaceKeepr · Coucher de soleil</b> · pixel-art · aucun border-radius / dégradé / flou · bordures 3px · ombres dures 4px · carte sombre permanente
+  </footer>
+
+</body>
+</html>

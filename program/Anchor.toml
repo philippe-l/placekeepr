@@ -1,0 +1,23 @@
+skip_local_validator = true
+
+[toolchain]
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+place_registry = "EXB4PeyChBveaChFW5nGTqJ2DmNp292cRFo4Ks1aC9pU"
+
+[programs.devnet]
+place_registry = "EXB4PeyChBveaChFW5nGTqJ2DmNp292cRFo4Ks1aC9pU"
+
+# Wallet dev du projet (jamais commité) — paie les déploiements devnet.
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/placekeepr-dev.json"
+
+[scripts]
+test = "cargo test"
+
+[hooks]

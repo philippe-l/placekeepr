@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+.env
+.env.local
+*.key
+*-keypair.json
+
+# Dumps de sauvegarde (données + photos) — jamais commités
+backups/

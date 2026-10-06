@@ -1,0 +1,15 @@
+# Sauvegarde PlaceKeepr. Déposer dans /etc/systemd/system/ puis :
+#   sudo systemctl daemon-reload && sudo systemctl enable --now placekeepr-backup.timer
+[Unit]
+Description=Sauvegarde PlaceKeepr (dump Postgres + assets)
+# Docker doit être debout : le dump et l'archive passent par des conteneurs.
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+# Tourne sous l'utilisateur propriétaire de la stack, membre du groupe docker :
+# pas besoin de root, et les archives restent lisibles par lui.
+User=debian
+Group=debian
+ExecStart=/home/debian/placekeepr/server/scripts/backup.sh

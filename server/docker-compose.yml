@@ -1,0 +1,55 @@
+name: placekeepr
+
+# Le reverse proxy n'est PAS dans cette stack : les ports 80/443 appartiennent
+# au nginx de la stack baladezen, qui sert déjà plusieurs domaines avec certbot.
+# L'API s'attache à son réseau (`baladezen_web`) et se laisse joindre par son
+# alias ; voir nginx/placekeepr.conf.
+
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: placekeepr
+      POSTGRES_USER: placekeepr
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD requis}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Rejoué au tout premier démarrage seulement (volume vide).
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U placekeepr -d placekeepr']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Aucun port publié : la base n'est joignable que depuis le réseau interne.
+
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Source de vérité de la connexion : recomposée ici pour que .env n'ait
+      # à porter que le mot de passe.
+      DATABASE_URL: postgres://placekeepr:${POSTGRES_PASSWORD:?}@db:5432/placekeepr
+      ASSETS_DIR: /data/assets
+    volumes:
+      - assets:/data/assets
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      # `default` pour joindre la base, `baladezen_web` pour être joint par nginx.
+      default:
+      baladezen_web:
+        aliases:
+          - placekeepr-api
+    # Aucun port publié : rien de cette stack n'est exposé directement.
+
+networks:
+  baladezen_web:
+    external: true
+
+volumes:
+  pgdata:
+  assets:
