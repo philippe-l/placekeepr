@@ -79,6 +79,66 @@ verified against devnet with scripted scenarios during development, including
 forged messages, a second `mintV2`, a foreign tree and concurrent requests at the
 limit. An automated server test suite is on the roadmap.
 
+## Trust model and failure handling
+
+### What the verifier can and cannot do
+
+The anti-cheat relies on one server key, the **verifier**. That is a deliberate trade-off:
+a phone cannot prove its own position, so someone has to check it, and the chain makes
+that check impossible to skip. The point is to keep this key as weak as possible.
+
+- **It cannot act for a user.** It never pays and never signs as the keeper or visitor.
+  Every capture or visit also needs the user's own Seed Vault signature.
+- **It only signs what it has inspected:** one registry instruction, a place PDA it
+  derived itself, and a `mintV2` checked field by field. Any message that mentions the
+  verifier key elsewhere is refused (`server/src/cosign.ts`).
+- **It holds no funds and controls no payout.** Royalty splits are computed on-chain from
+  accounts the caller cannot choose.
+- **Worst case if the key leaks:** an attacker could register fake places with wallets of
+  their own and mint into the tree. They still could not touch existing places, likes,
+  vaults or anyone's assets.
+
+**Recovery.** The program admin rotates the key with `set_verifier`, then re-delegates
+the tree to the new key. Abusive places are removed on-chain by the moderation script
+(`npm run remove-places`, dry-run by default). It closes likes, visits and the vault
+first, then the place, so the cell becomes free again. The server mirror hides the
+removed places but keeps them for accounting.
+Today the admin is a single dev key. The plan before mainnet: move the admin to a
+multisig and the verifier key to a dedicated signer (KMS/HSM).
+
+### What the user sees when something fails
+
+| Situation | What happens |
+| --- | --- |
+| Location or camera permission denied | Capture is blocked before anything is uploaded or signed (*"Location not allowed"*, *"Camera not allowed — can't prove the place"*). |
+| Mock location, accuracy worse than 25 m | Refused on the phone first, then again by the server (*"Mock location detected"*, *"GPS accuracy too low (> 25 m) — wait for a better fix"*). |
+| Teleporting, daily quota, too close to a place | Checked by a read-only pre-check **before the camera opens**, so no photo is uploaded for nothing. Then enforced again when the server co-signs. The message names the limit or the distance. |
+| Visit too far, or during the 24 h cooldown | The button shows the cooldown. A refused visit says how far away you are (*"get within 50 m"*). |
+| Someone kept the place first | The registry and the mint share one transaction, so the whole transaction fails and nothing is minted (*"Too late — this place already has a keeper!"*). |
+| Verifier or API down | Fails closed: no co-signature, no capture. A network error during the pre-check does not block, because the server checks again when it co-signs. |
+| Upload interrupted, retry | Assets are named by the photo's hash, so a retry reuses the same files and creates no orphans. |
+| Mirror sync fails | The mint is already on-chain and in the local log. Sync is best-effort and resumes on the next launch. Balances and cooldowns are read on-chain, never from the mirror. |
+| Indexer misses an event | Visits and royalties never depend on the mirror. Missed transactions can be replayed (`npm run replay-helius-tx`). |
+| SKR mainnet RPC down | Fails open to the base quota, so nothing depends on mainnet. |
+
+The UI is available in English and French and follows the device language.
+
+### Dependency advisories
+
+`npm audit` still lists advisories. They come from four sources:
+
+- **Build and test tooling** that never ships in the APK: Metro's `image-size`, Jest's
+  `js-yaml`.
+- **Upstream Solana libraries** with no fixed release: `bigint-buffer`, pulled in by
+  `@solana/spl-token`. The app only decodes accounts it fetched itself from the RPC.
+  It is tracked until an upstream fix ships.
+- **Expo and React Native internals**, which move with the SDK.
+- **False fixes:** npm's `--force` suggestions are downgrades by several major versions,
+  `expo@44` or `spl-token@0.1.8`.
+
+The transitive packages that could be updated without changing what the app runs have
+been updated.
+
 ## Architecture
 
 ```
@@ -194,6 +254,13 @@ Every network setting comes from environment variables (`EXPO_PUBLIC_SOLANA_NETW
 `EXPO_PUBLIC_PLACE_VERIFIER`, `EXPO_PUBLIC_API_URL`). Switching to mainnet is a matter of
 configuration. Create your own Merkle tree with
 `TREE_DELEGATE=<verifier pubkey> npm run create-tree`.
+
+To run your own verifier: copy `server/.env.example` to `server/.env`. Put a fresh keypair
+(`solana-keygen new`, the 64-byte JSON array) in `VERIFIER_KEYPAIR`. Set
+`PLACE_REGISTRY_PROGRAM`, `MERKLE_TREE` and `SOLANA_RPC_URL`, then run
+`docker compose up -d --build`. On-chain, the program admin points the config at that
+key (`set_verifier`). The tree is created with `TREE_DELEGATE` set to the same key. The
+app gets its public key as `EXPO_PUBLIC_PLACE_VERIFIER`.
 
 ## Project notes
 
